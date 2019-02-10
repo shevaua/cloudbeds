@@ -1,2 +1,5 @@
 # IDE configuration
 .vscode/
+
+# App configs
+config/*.ini

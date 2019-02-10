@@ -5,6 +5,14 @@ use Exceptions\Cli\WrongActionException;
 class Application
 {
 
+    const ENV_DEV = 'development';
+    const ENV_PROD = 'production';
+
+    const ENVS = [
+        self::ENV_DEV,
+        self::ENV_PROD,
+    ];
+
     private static $instance;
 
     public static function getInstance()
@@ -36,6 +44,9 @@ class Application
 
     }
 
+
+    private $env;
+
     public function run()
     {
 
@@ -48,12 +59,19 @@ class Application
         {
             $this->runWeb();
         }
-
     }
 
     private function runCli()
     {
 
+        if(
+            !$env = getenv('ENV')
+            or !in_array($env, self::ENVS)
+        ) {
+            $env = self::ENV_DEV;
+        }
+        $this->env = $env;
+        
         global $argv;
         $params = $argv;
 
@@ -86,7 +104,24 @@ class Application
 
     private function runWeb()
     {
+
+        if(
+            !defined('APP_ENV')
+            or !$env = APP_ENV
+            or !in_array($env, self::ENVS)
+        ) {
+            $env = self::ENV_DEV;
+        }
+        $this->env = $env;
+        
         die('use cli for now');
     }
+
+    public function getEnv()
+    {
+
+        return $this->env;
+
+    }    
 
 }
