@@ -38,4 +38,22 @@ class Connection
 
     }
 
+    public function execute($query)
+    {
+        
+        return $this->conn
+            ->query($query);
+
+    }
+
+    public function getError()
+    {
+        return $this->conn->error;
+    }
+
+    public function getLastId()
+    {
+        return $this->conn->insert_id;
+    }
+
 }
