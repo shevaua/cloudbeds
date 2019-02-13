@@ -3,7 +3,7 @@
 namespace Cli\Action;
 
 use Interfaces\Runable;
-use Model\Price;
+use Model\Interval;
 
 class Reset implements Runable
 {
@@ -11,8 +11,9 @@ class Reset implements Runable
     public function run(array $params = [])
     {
         
-        Price::truncate();
-        echo 'Table is clean'.PHP_EOL;
+        Interval::query()
+            ->truncate();
+        echo 'Table is clean' . PHP_EOL;
 
     }
 

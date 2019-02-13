@@ -16,20 +16,21 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `price`
+-- Table structure for table `interval`
 --
 
-DROP TABLE IF EXISTS `price`;
+DROP TABLE IF EXISTS `interval`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `price` (
+CREATE TABLE `interval` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `start` date NOT NULL,
   `end` date NOT NULL,
   `price` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `start` (`start`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  UNIQUE KEY `start` (`start`),
+  UNIQUE KEY `end` (`end`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -41,4 +42,4 @@ CREATE TABLE `price` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-02-11  0:34:00
+-- Dump completed on 2019-02-13  1:04:34

@@ -3,7 +3,7 @@
 namespace Cli\Action;
 
 use Interfaces\Runable;
-use Model\Price;
+use Model\Interval;
 
 class Show implements Runable
 {
@@ -11,13 +11,13 @@ class Show implements Runable
     public function run(array $params = [])
     {
         
-        $priceList = Price::query()
+        $intervals = Interval::query()
                 ->order(['start' => 'asc'])
                 ->find();
 
-        foreach($priceList as $priceObj)
+        foreach($intervals as $interval)
         {
-            echo $priceObj.PHP_EOL;
+            echo $interval . PHP_EOL;
         }
 
     }

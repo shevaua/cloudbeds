@@ -2,6 +2,7 @@
 
 namespace DB;
 use Exceptions\SQLException;
+use Interfaces\Statement;
 
 class QueryBuilder
 {
@@ -9,6 +10,7 @@ class QueryBuilder
     private $table;
     private $model;
 
+    private $where = [];
     private $order = [];
     private $limit;
 
@@ -22,6 +24,14 @@ class QueryBuilder
     {
         $this->limit = $num;
         return $this;
+    }
+
+    public function where(Statement $statement)
+    {
+
+        $this->where = $statement;
+        return $this;
+
     }
 
     public function order(array $order)
@@ -102,12 +112,57 @@ class QueryBuilder
 
     }
 
+    public function update($pk, $values)
+    {
+
+        $query = 
+            'update `' . $this->table . '` set ';
+        foreach($values as $name => $value)
+        {
+            $query .= '`' . $name . '`='
+                .(is_int($value) ? $value : '\'' . $value . '\'')
+                .', ';
+        }
+        $query = rtrim($query, ', ');
+        $query .= ' where id='.$pk;
+        var_dump($query); die;
+
+        $connection = Connection::get();
+        if(!$connection->execute($query))
+        {
+            throw new SQLException($connection->getError(), $query);
+        }
+
+        $values = array_merge($data, ['id' => $connection->getLastId()]);
+        return new $this->model($values);
+
+    }
+
+    public function truncate()
+    {
+
+        $connection = Connection::get();
+        $query = 'truncate table `'.$this->table.'`';
+        $isSuccess = $connection->execute($query);
+        
+        if(!$isSuccess)
+        {
+            throw new SQLException($connection->getError(), $query);
+        }
+
+    }
+
     protected function toSQL()
     {
 
         $sql = 
             'select `' . $this->table . '`.* '
             .'from `'.$this->table.'` ';
+
+        if($this->where)
+        {
+            $sql .= 'where '.$this->where->toString().' ';
+        }
 
         if($this->order)
         {
