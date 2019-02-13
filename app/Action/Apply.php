@@ -25,19 +25,40 @@ class Apply
      */
     private $interval;
 
+    /**
+     * List of Intervals with changes
+     * @var array $forSave 
+     */
+    private $forSave = [];
+
     public function __construct(Interval $interval)
     {
 
         $this->interval = $interval;
-        $this->init();
+        $this->identifyChanges();
+        $this->saveChanges();
 
     }
 
     /**
-     * Initialize the changes
+     * Save the changes
      * @return void
      */
-    protected function init()
+    private function saveChanges()
+    {
+
+        foreach($this->forSave as $interval)
+        {
+            $interval->save();
+        }
+        // var_dump($this->forSave); die;
+    }
+
+    /**
+     * Identify the changes
+     * @return void
+     */
+    protected function identifyChanges()
     {
 
         $newInterval = $this->interval;
@@ -48,10 +69,70 @@ class Apply
             return;
         }
    
+        /**
+         * @var Interval $oldInterval
+         */
         foreach($affectedIntervals as $oldInterval)
         {
             $type = $this->compareIntervals($newInterval, $oldInterval);
-            var_dump($type);
+            switch($type)
+            {
+                case self::TYPE_COVERED:
+
+                    // Do not change anything if price is the same
+                    if($newInterval->getPrice() == $oldInterval->getPrice())
+                    {
+                        return;
+                    }
+
+                    $coveredStartDate = $oldInterval->getStartDate();
+                    $coveredEndDate = $oldInterval->getEndDate();
+                    $coveredStartTime = $oldInterval->getStartTime();
+                    $coveredEndTime = $oldInterval->getEndTime();  
+                    
+                    if(
+                        $newInterval->getStartTime() == $oldInterval->getStartTime()
+                        and $newInterval->getEndTime() == $oldInterval->getEndTime()
+                    ) {
+                        $oldInterval->setPrice($newInterval->getPrice());
+                        $this->forSave[] = $oldInterval;
+                        return;
+                    }
+                    
+                    $isOldUpdated = false;
+
+                    if($newInterval->getStartTime() > $coveredStartTime)
+                    {
+                        $isOldUpdated = true;
+                        $oldInterval->setEndDate($newInterval->getBeforeDate());
+                        $this->forSave[] = $oldInterval;
+                    }
+
+                    if($newInterval->getEndTime() < $coveredEndTime)
+                    {
+                        if($isOldUpdated)
+                        {
+                            $this->forSave[] = new Interval([
+                                'price' => $oldInterval->getPrice(),
+                                'start' => $newInterval->getAfterDate(),
+                                'end' => $coveredEndDate,
+                            ]);
+                        }
+                        else
+                        {
+                            $isOldUpdated = true;
+                            $oldInterval->setStartDate($newInterval->getAfterDate());
+                            $this->forSave[] = $oldInterval;
+                        }
+                    }
+
+                    $this->forSave[] = $newInterval;
+
+                    return;
+
+                default:
+                    return;
+            }
         }
 
     }

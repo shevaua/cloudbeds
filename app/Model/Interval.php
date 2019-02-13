@@ -27,7 +27,12 @@ class Interval
 
     }
     
-    
+    /**
+     * @var int $id
+     * @var string $start
+     * @var string $end
+     * @var int $price
+     */
     private $id;
     private $start;
     private $end;
@@ -55,6 +60,48 @@ class Interval
         {
             $this->price = (int) $values['price'];
         }
+
+    }
+
+    /**
+     * @return self
+     */
+    public function setStartDate(string $date)
+    {
+
+        if($this->start != $date)
+        {
+            $this->start = $date;
+        }
+        return $this;
+
+    }
+
+    /**
+     * @return self
+     */
+    public function setEndDate(string $date)
+    {
+
+        if($this->end != $date)
+        {
+            $this->end = $date;
+        }
+        return $this;
+
+    }
+
+    /**
+     * @return self
+     */
+    public function setPrice(int $price)
+    {
+
+        if($this->price != $price)
+        {
+            $this->price = $price;
+        }
+        return $this;
 
     }
 

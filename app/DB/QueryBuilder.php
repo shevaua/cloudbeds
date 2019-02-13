@@ -125,15 +125,14 @@ class QueryBuilder
         }
         $query = rtrim($query, ', ');
         $query .= ' where id='.$pk;
-        var_dump($query); die;
-
+        
         $connection = Connection::get();
         if(!$connection->execute($query))
         {
             throw new SQLException($connection->getError(), $query);
         }
 
-        $values = array_merge($data, ['id' => $connection->getLastId()]);
+        $values = array_merge($values, ['id' => $connection->getLastId()]);
         return new $this->model($values);
 
     }
