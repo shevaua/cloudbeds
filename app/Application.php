@@ -1,6 +1,14 @@
 <?php
 
+use Http\Request;
+use Http\Router;
+use Http\Response;
+use Http\Route;
+use Exceptions\Http\WrongActionException as HttpActionException;
 use Exceptions\Cli\WrongActionException;
+use Http\Response\ErrorResponse;
+use Http\Response\HtmlResponse;
+use View\HtmlView;
 
 class Application
 {
@@ -59,6 +67,7 @@ class Application
         {
             $this->runWeb();
         }
+
     }
 
     private function runCli()
@@ -105,6 +114,10 @@ class Application
     private function runWeb()
     {
 
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
+
         if(
             !defined('APP_ENV')
             or !$env = APP_ENV
@@ -114,7 +127,23 @@ class Application
         }
         $this->env = $env;
         
-        die('use cli for now');
+        try
+        {
+
+            $request = $this->getIncomeRequest();
+        
+            $route = Router::getRoute($request);
+
+            $response = $this->wrapResponse($route, $request);
+
+            $response->send();
+
+        }
+        catch(Throwable $e)
+        {
+            (new ErrorResponse($e))->send();
+        }
+
     }
 
     public function getEnv()
@@ -123,5 +152,38 @@ class Application
         return $this->env;
 
     }    
+
+    private function getIncomeRequest(): Request
+    {
+
+        return new Request(
+            $_SERVER['REQUEST_METHOD'],
+            str_replace('?'.$_SERVER['QUERY_STRING'] , '', $_SERVER['REQUEST_URI']),
+            $_GET + $_POST
+        );
+
+    }
+
+    private function wrapResponse(Route $route, Request $request): Response
+    {
+
+        $factory = new Http\Factory;
+
+        $controller = $factory
+            ->getControllert($route->getController());
+    
+        if(!method_exists($controller, $request->getMethod()))
+        {
+            throw new HttpActionException(get_class($controller), $request->getMethod());
+        }
+
+        $return = $controller->{$request->getMethod()}($request);
+
+        if($return instanceof HtmlView)
+        {
+            return new HtmlResponse($return, $return->getCode());
+        }
+
+    }
 
 }
