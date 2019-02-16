@@ -35,6 +35,8 @@ class Connection
         $db = $config->get('db.name');
 
         $this->conn = new mysqli($host, $user, $pass, $db);
+        $this->conn
+            ->autocommit(false);
 
     }
 
@@ -54,6 +56,16 @@ class Connection
     public function getLastId()
     {
         return $this->conn->insert_id;
+    }
+
+    public function transaction()
+    {
+        return $this->conn->begin_transaction();
+    }
+
+    public function commit()
+    {
+        return $this->conn->commit();
     }
 
 }

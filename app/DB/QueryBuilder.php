@@ -137,6 +137,18 @@ class QueryBuilder
 
     }
 
+    public function delete($pk)
+    {
+        $connection = Connection::get();
+        $query = 'delete from `'.$this->table.'` where id='.$pk;
+        $isSuccess = $connection->execute($query);
+
+        if(!$isSuccess)
+        {
+            throw new SQLException($connection->getError(), $query);
+        }
+    }
+
     public function truncate()
     {
 

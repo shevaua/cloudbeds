@@ -137,6 +137,16 @@ class Interval
 
     }
 
+    public function delete()
+    {
+        if(!$this->id)
+        {
+            throw new \LogicException();
+        }
+        self::query()
+            ->delete($this->id);
+    }
+
     /**
      * Get Starting Date of the interval
      * @return string

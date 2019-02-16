@@ -7,6 +7,7 @@ use Model\Interval;
 use DB\Where;
 use DB\Clause;
 use DB\Combined;
+use DB\Connection;
 
 class Apply
 {
@@ -16,8 +17,10 @@ class Apply
      */
     const TYPE_OUT = 'outside';
     const TYPE_IN = 'inside';
-    const TYPE_CROSS = 'cross';
-    const TYPE_JOIN = 'join';
+    const TYPE_LEFT_CROSS = 'left_cross';
+    const TYPE_LEFT_JOIN = 'left_join';
+    const TYPE_RIGHT_CROSS = 'right_cross';
+    const TYPE_RIGHT_JOIN = 'right_join';
     const TYPE_COVERED = 'covered';
 
     /**
@@ -30,6 +33,12 @@ class Apply
      * @var array $forSave 
      */
     private $forSave = [];
+
+    /**
+     * List of Intervals for removal
+     * @var array $forDelete
+     */
+    private $forDelete = [];
 
     public function __construct(Interval $interval)
     {
@@ -47,11 +56,29 @@ class Apply
     private function saveChanges()
     {
 
+        if(
+            !$this->forSave
+            and !$this->forDelete
+        ) {
+            return;
+        }
+
+        $conn = Connection::get();
+
+        $conn->transaction();
+
+        foreach($this->forDelete as $interval)
+        {
+            $interval->delete();
+        }
+
         foreach($this->forSave as $interval)
         {
             $interval->save();
         }
-        // var_dump($this->forSave); die;
+
+        $conn->commit();
+
     }
 
     /**
@@ -65,16 +92,24 @@ class Apply
 
         if(!$affectedIntervals = $this->getAffectedIntervals())
         {
-            $newInterval->save();
+            $this->forSave[] = $newInterval;
             return;
         }
    
+        $newShouldBeSaved = true;
+
+        $startDate = $newInterval->getStartDate();
+        $endDate = $newInterval->getEndDate();
+
+        $leftJoin = null;
+
         /**
          * @var Interval $oldInterval
          */
         foreach($affectedIntervals as $oldInterval)
         {
             $type = $this->compareIntervals($newInterval, $oldInterval);
+            
             switch($type)
             {
                 case self::TYPE_COVERED:
@@ -87,51 +122,104 @@ class Apply
 
                     $coveredStartDate = $oldInterval->getStartDate();
                     $coveredEndDate = $oldInterval->getEndDate();
-                    $coveredStartTime = $oldInterval->getStartTime();
-                    $coveredEndTime = $oldInterval->getEndTime();  
                     
-                    if(
-                        $newInterval->getStartTime() == $oldInterval->getStartTime()
-                        and $newInterval->getEndTime() == $oldInterval->getEndTime()
-                    ) {
-                        $oldInterval->setPrice($newInterval->getPrice());
-                        $this->forSave[] = $oldInterval;
-                        return;
-                    }
-                    
-                    $isOldUpdated = false;
-
-                    if($newInterval->getStartTime() > $coveredStartTime)
-                    {
-                        $isOldUpdated = true;
-                        $oldInterval->setEndDate($newInterval->getBeforeDate());
-                        $this->forSave[] = $oldInterval;
-                    }
-
-                    if($newInterval->getEndTime() < $coveredEndTime)
-                    {
-                        if($isOldUpdated)
-                        {
-                            $this->forSave[] = new Interval([
-                                'price' => $oldInterval->getPrice(),
-                                'start' => $newInterval->getAfterDate(),
-                                'end' => $coveredEndDate,
-                            ]);
-                        }
-                        else
-                        {
-                            $isOldUpdated = true;
-                            $oldInterval->setStartDate($newInterval->getAfterDate());
-                            $this->forSave[] = $oldInterval;
-                        }
-                    }
-
+                    $oldInterval
+                        ->setEndDate($newInterval->getBeforeDate());
+                    $this->forSave[] = $oldInterval;
+                    $this->forSave[] = new Interval([
+                        'price' => $oldInterval->getPrice(),
+                        'start' => $newInterval->getAfterDate(),
+                        'end' => $coveredEndDate,
+                    ]);
                     $this->forSave[] = $newInterval;
 
                     return;
 
+                case self::TYPE_LEFT_JOIN:
+
+                    $oldInterval->setEndDate($endDate);
+                    $this->forSave[] = $oldInterval;
+                    $leftJoin = $oldInterval;
+                    $newShouldBeSaved = false;
+
+                    break;
+
+                case self::TYPE_LEFT_CROSS:
+
+                    if($newInterval->getPrice() == $oldInterval->getPrice())
+                    {
+                        $oldInterval->setEndDate($newInterval->getEndDate());
+                        $newShouldBeSaved = false;
+                        $leftJoin = $oldInterval;
+                    }
+                    else
+                    {
+                        $oldInterval->setEndDate($newInterval->getBeforeDate());
+                    }
+                    $this->forSave[] = $oldInterval;
+                    break;
+
+                case self::TYPE_IN:
+                    $this->forDelete[] = $oldInterval;
+                    break;
+
+                case self::TYPE_RIGHT_CROSS:
+
+                    if($newInterval->getPrice() == $oldInterval->getPrice())
+                    {
+                        if($leftJoin)
+                        {
+                            $leftJoin->setEndDate($oldInterval->getEndDate());
+                            $this->forDelete[] = $oldInterval;
+                        }
+                        else
+                        {
+                            $oldInterval->setStartDate($newInterval->getStartDate());
+                            $newShouldBeSaved = false;
+                            $this->forSave[] = $oldInterval;
+                        }
+                    }
+                    else
+                    {
+                        $oldInterval->setStartDate($newInterval->getAfterDate());
+                        $this->forSave[] = $oldInterval;
+                    }
+                    break;
+
+                case self::TYPE_RIGHT_JOIN:
+
+                    if($leftJoin)
+                    {
+                        $leftJoin->setEndDate($oldInterval->getEndDate());
+                        $this->forDelete[] = $oldInterval;
+                    }
+                    else
+                    {
+                        $oldInterval->setStartDate($newInterval->getStartDate());
+                        $this->forSave[] = $oldInterval;
+                        $newShouldBeSaved = false;
+                    }
+                    break;
+
                 default:
-                    return;
+                    throw new \LogicException();
+            }
+        }
+
+        if($newShouldBeSaved)
+        {
+            if($this->forDelete)
+            {
+                $firstInterval = array_shift($this->forDelete);
+                $firstInterval
+                    ->setStartDate($newInterval->getStartDate())
+                    ->setEndDate($newInterval->getEndDate())
+                    ->setPrice($newInterval->getPrice());
+                $this->forSave[] = $firstInterval;
+            }
+            else
+            {
+                $this->forSave[] = $newInterval;
             }
         }
 
@@ -182,7 +270,7 @@ class Apply
             $newPrevTime == $oldEndTime
             and $newPrice == $oldPrice
         ) {
-            return self::TYPE_JOIN;
+            return self::TYPE_LEFT_JOIN;
         }
 
         // Right Join
@@ -190,15 +278,7 @@ class Apply
             $newNextTime == $oldStartTime
             and $newPrice == $oldPrice
         ) {
-            return self::TYPE_JOIN;
-        }
-
-        // Covered by old interval
-        if(
-            $newStartTime >= $oldStartTime
-            and $newEndTime <= $oldEndTime
-        ) {
-            return self::TYPE_COVERED;
+            return self::TYPE_RIGHT_JOIN;
         }
 
         // Old inside the new one
@@ -209,22 +289,28 @@ class Apply
             return self::TYPE_IN;
         }
 
-        // Cross 
+        // Covered by old interval
         if(
-            $oldStartTime > $newStartTime
-            and $oldStartTime <= $newEndTime
-            and $oldEndTime > $newEndTime 
+            $newStartTime > $oldStartTime
+            and $newEndTime < $oldEndTime
         ) {
-            return self::TYPE_CROSS;
+            return self::TYPE_COVERED;
         }
 
-        // Cross
+        // Cross right
+        if(
+            $oldStartTime >= $newStartTime
+            and $oldEndTime > $newEndTime 
+        ) {
+            return self::TYPE_RIGHT_CROSS;
+        }
+
+        // Cross left
         if(
             $oldStartTime < $newStartTime
-            and $oldEndTime >= $newStartTime
-            and $oldEndTime < $newEndTime 
+            and $oldEndTime <= $newEndTime 
         ) {
-            return self::TYPE_CROSS;
+            return self::TYPE_LEFT_CROSS;
         }
 
         throw new \LogicException();
