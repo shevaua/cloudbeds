@@ -15,8 +15,8 @@ class Add implements Runable
         
         if(
             count($params) == 2
-            and $price = (int) $params[1]
-            and $price >= 1
+            and $price = (float) $params[1]
+            and $price > 0
             and preg_match(self::REGEX_DATE, $params[0])
             and $timestamp = strtotime($params[0])
         ) {
@@ -26,8 +26,8 @@ class Add implements Runable
 
         if(
             count($params) == 3
-            and $price = (int) $params[2]
-            and $price >= 1
+            and $price = (float) $params[2]
+            and $price > 0
             and preg_match(self::REGEX_DATE, $params[0])
             and preg_match(self::REGEX_DATE, $params[1])
             and $start = strtotime($params[0])
@@ -38,8 +38,8 @@ class Add implements Runable
             return;            
         }
 
-        echo 'Run cli/do.php add <date:YYYY-MM-DD> <price:INT>'.PHP_EOL;
-        echo 'Run cli/do.php add <start_date:YYYY-MM-DD> <end_date:YYYY-MM-DD> <price:INT>'.PHP_EOL;
+        echo 'Run cli/do.php add <date:YYYY-MM-DD> <price:FLOAT>'.PHP_EOL;
+        echo 'Run cli/do.php add <start_date:YYYY-MM-DD> <end_date:YYYY-MM-DD> <price:FLOAT>'.PHP_EOL;
         echo 'Note: start_date should be <= to end_date and price should be > 0'.PHP_EOL;
         
     }

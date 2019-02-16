@@ -31,7 +31,7 @@ class Interval
      * @var int $id
      * @var string $start
      * @var string $end
-     * @var int $price
+     * @var float $price
      */
     private $id;
     private $start;
@@ -58,7 +58,7 @@ class Interval
 
         if(isset($values['price']))
         {
-            $this->price = (int) $values['price'];
+            $this->price = (float) $values['price'];
         }
 
     }
@@ -94,7 +94,7 @@ class Interval
     /**
      * @return self
      */
-    public function setPrice(int $price)
+    public function setPrice(float $price)
     {
 
         if($this->price != $price)
@@ -105,11 +105,18 @@ class Interval
 
     }
 
-    public function __toString()
+    /**
+     * @return string
+     */
+    public function __toString(): string
     {
-        return ($this->start == $this->end) ?
-            '[       '.$this->start. '       : '.$this->price.']' :
-            '['.$this->start. ' - '. $this->end.' : '.$this->price.']';
+        return '['
+            . (($this->start == $this->end) ? 
+                '       '.$this->start. '       ' :
+                $this->start. ' - '. $this->end )
+            . ': ' 
+            . number_format($this->price, 2)
+            . ']';
     }
 
     public function save()
@@ -185,9 +192,9 @@ class Interval
 
     /**
      * Get Price of the interval
-     * @return int 
+     * @return float 
      */
-    public function getPrice(): int
+    public function getPrice(): float
     {
         return $this->price;
     }
