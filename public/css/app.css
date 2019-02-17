@@ -19,3 +19,10 @@
 {
     background-color: #080;
 }
+
+#logs div
+{
+    background-color: #ccc;
+    text-align: left;
+    margin-bottom: 2px;
+}

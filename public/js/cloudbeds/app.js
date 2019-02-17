@@ -146,6 +146,7 @@ cb = {};
                             innerHtml += 'Empty';
                         }
                         document.getElementById("intervals").innerHTML = innerHtml;
+                        Actions.addLogs(response.queries);
                     }
                 })
                 .catch((response) => {
@@ -167,6 +168,19 @@ cb = {};
             innerHtml += '<button onclick="cb.deleteInterval(this.form)" type="button">Delete</button>'            
             innerHtml += '</form></div>';
             document.getElementById("form").innerHTML = innerHtml;
+        },
+        addLogs: (messages) => {
+            var innerHtml = '';
+            for(i = messages.length - 1; i >= 0; i--)
+            {
+                innerHtml += '<div>' + messages[i] + '</div>';
+            }
+            var el = document.getElementById("logs");
+            el.innerHTML = innerHtml + el.innerHTML;
+        },
+        clearLogs: () => {
+            var el = document.getElementById("logs");
+            el.innerHTML = '';
         }
     }
 
@@ -176,12 +190,14 @@ cb = {};
                 if(response.success)
                 {
                     Actions.resetList();
+                    Actions.addLogs(response.queries);
                 }
             })
             .catch((response) => { console.log(response)});
     };
 
     cb.clickRefresh = () => {
+        Actions.clearLogs();
         Actions.resetList();
     };
 
@@ -195,6 +211,7 @@ cb = {};
                 {
                     Actions.clearForm();
                     Actions.resetList();
+                    Actions.addLogs(response.queries);
                 }
             })
             .catch((response) => {console.log(response)});
@@ -210,6 +227,7 @@ cb = {};
                 {
                     Actions.clearForm();
                     Actions.resetList();
+                    Actions.addLogs(response.queries);
                 }
             })
             .catch((response) => {console.log(response)});

@@ -7,6 +7,7 @@
 <div id="intervals"></div>
 
 <h3>Actions:</h3>
-<div id="actions">
+<div id="actions"></div>
 
-</div>
+<h3>Logs</h3>
+<div id="logs"></div>

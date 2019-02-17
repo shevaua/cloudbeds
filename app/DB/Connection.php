@@ -4,8 +4,9 @@ namespace DB;
 
 use Config;
 use mysqli;
+use Pattern\Observer\Observable;
 
-class Connection
+class Connection extends Observable
 {
 
     private static $instance;
@@ -43,8 +44,17 @@ class Connection
     public function execute($query)
     {
         
-        return $this->conn
+        $return = $this->conn
             ->query($query);
+
+        if(!$return)
+        {
+            throw new SQLException($this->getError(), $query);
+        }
+
+        $this->notifyObservers($query);
+
+        return $return;
 
     }
 

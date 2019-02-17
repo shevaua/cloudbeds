@@ -7,13 +7,19 @@ use Http\Request;
 use Model\Interval as Range;
 use Api\Insert;
 use Api\Delete;
+use Pattern\Observer\Observer;
+use DB\Connection;
 
-class Interval
+class Interval implements Observer
 {
+
+    private $queries = [];
 
     public function get(Request $r)
     {
      
+        Connection::get()->registerObserver($this);
+
         $collection = Range::query()
             ->order(['start' => 'asc'])
             ->find();
@@ -32,6 +38,7 @@ class Interval
         return new JsonView([
             'success' => true,
             'intervals' => $intervals,
+            'queries' => $this->queries,
         ]);
 
     }
@@ -56,10 +63,13 @@ class Interval
             ]);
         }
 
+        Connection::get()->registerObserver($this);
+
         new Insert($params['start'], $params['end'], $price);
         
         return new JsonView([
             'success' => true,
+            'queries' => $this->queries,
         ]);
         
     }
@@ -82,12 +92,20 @@ class Interval
             ]);
         }
 
+        Connection::get()->registerObserver($this);
+
         new Delete($params['start'], $params['end']);
         
         return new JsonView([
             'success' => true,
+            'queries' => $this->queries,
         ]);
         
+    }
+
+    public function notify($message)
+    {
+        $this->queries[] = $message;
     }
 
 }
