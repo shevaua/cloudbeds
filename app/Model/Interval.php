@@ -235,4 +235,13 @@ class Interval
         return strtotime('+1 day', $this->getEndTime());
     }
 
+    /**
+     * Get id of the interval
+     * @return int|null
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
 }

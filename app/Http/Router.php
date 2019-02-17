@@ -27,7 +27,8 @@ class Router
     public function __construct()
     {
         $this->routes[] = new Route('/', 'Home');
-        // $this->route
+        $this->routes[] = new Route('/api/interval', 'API\Interval');
+        $this->routes[] = new Route('/api/interval/reset', 'API\Interval\Reset');
     }
 
     public function get(Request $r): Route

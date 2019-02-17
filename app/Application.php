@@ -8,7 +8,9 @@ use Exceptions\Http\WrongActionException as HttpActionException;
 use Exceptions\Cli\WrongActionException;
 use Http\Response\ErrorResponse;
 use Http\Response\HtmlResponse;
+use Http\Response\JsonResponse;
 use View\HtmlView;
+use View\JsonView;
 
 class Application
 {
@@ -182,6 +184,10 @@ class Application
         if($return instanceof HtmlView)
         {
             return new HtmlResponse($return, $return->getCode());
+        }
+        elseif($return instanceof JsonView)
+        {
+            return new JsonResponse($return, $return->getCode());
         }
 
     }
