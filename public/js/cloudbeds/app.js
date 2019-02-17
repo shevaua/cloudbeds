@@ -131,10 +131,11 @@ cb = {};
                         {
                             var interval = response.intervals[i];
                             innerHtml += '<li><form>';
-                            innerHtml += '<input type="hidden" name="id" value="'+interval.id+'">';
                             innerHtml += '<input type="text" placeholder="Start: YYYY-MM-DD" name="start" value="'+interval.start+'">';
                             innerHtml += '<input type="text" placeholder="End: YYYY-MM-DD" name="end" value="'+interval.end+'">';
                             innerHtml += '<input type="text" placeholder="price" name="price" value="'+interval.price+'">'
+                            innerHtml += '<button onclick="cb.addInterval(this.form)" type="button">Update</button>'            
+                            innerHtml += '<button onclick="cb.deleteInterval(this.form)" type="button">Delete</button>'            
                             innerHtml += '</form></li>';
                         }
                         document.getElementById("intervals").innerHTML = innerHtml;
