@@ -1,4 +1,6 @@
--- affected intervals
+-------------------------------
+-- affected intervals for apply
+-------------------------------
 select `interval`.* 
 from `interval`
 where
@@ -12,3 +14,17 @@ where
     or (end >= $start and end <= $end)
     -- cover
     or (start < $start and end > $end)
+
+--------------------------------
+-- affected intervals for delete
+--------------------------------
+select `interval`.* 
+from `interval`
+where
+    -- cross left or in
+    (start >= $start and start <= $end)
+    -- crowss right or in
+    or (end >= $start and end <= $end)
+    -- cover
+    or (start < $start and end > $end)
+    

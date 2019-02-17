@@ -46,7 +46,7 @@ class Interval
     private $id;
     private $start;
     private $end;
-    private $price;
+    private $price = 0.0;
 
     public function __construct(array $values)
     {
@@ -130,9 +130,9 @@ class Interval
     {
         return '['
             . (($this->start == $this->end) ? 
-                '       '.$this->start. '       ' :
+                '       '.$this->start. '      ' :
                 $this->start. ' - '. $this->end )
-            . ': ' 
+            . ' : ' 
             . number_format($this->price, 2)
             . ']';
     }
