@@ -1,0 +1,31 @@
+# Requirments:
+# - php71
+# - php71-mysqli
+
+# DB Dump:
+mysql [db] -u [user] -p < schema.sql
+ 
+# Configuration:
+cd config/
+cp development.ini-sample development.ini
+cp development.ini-sample production.ini
+cd ../
+
+# Change cridentials in both development.ini and production.ini
+# development.ini - for cli
+# production.ini - for web
+
+# Testing connection 
+php cli/do.php testdb
+
+# add interval
+php cli/do.php add 2019-01-01 2019-01-31 100
+
+# show intervals 
+php cli/do.php show
+
+# delete interval
+php cli/do.php delete 2019-01-01 2019-01-31
+
+# reset 
+php cli/do.php reset
