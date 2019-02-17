@@ -26,3 +26,21 @@
     text-align: left;
     margin-bottom: 2px;
 }
+
+@media(max-width: 768px)
+{
+    button
+    {
+        display: block;
+        margin: auto;
+        padding: 10px;
+    }
+    #actions button
+    {
+        margin: auto;
+    }
+    input
+    {
+        padding: 10px;
+    }
+}
