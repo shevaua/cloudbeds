@@ -12,17 +12,6 @@ use DB\Connection;
 class Apply
 {
 
-    /*
-     * See notes/cases.php 
-     */
-    const TYPE_OUT = 'outside';
-    const TYPE_IN = 'inside';
-    const TYPE_LEFT_CROSS = 'left_cross';
-    const TYPE_LEFT_JOIN = 'left_join';
-    const TYPE_RIGHT_CROSS = 'right_cross';
-    const TYPE_RIGHT_JOIN = 'right_join';
-    const TYPE_COVERED = 'covered';
-
     /**
      * @var Interval
      */
@@ -108,11 +97,11 @@ class Apply
          */
         foreach($affectedIntervals as $oldInterval)
         {
-            $type = $this->compareIntervals($newInterval, $oldInterval);
+            $type = $newInterval->compareTo($oldInterval);
             
             switch($type)
             {
-                case self::TYPE_COVERED:
+                case Interval::TYPE_COVERED:
 
                     // Do not change anything if price is the same
                     if($newInterval->getPrice() == $oldInterval->getPrice())
@@ -135,7 +124,7 @@ class Apply
 
                     return;
 
-                case self::TYPE_LEFT_JOIN:
+                case Interval::TYPE_LEFT_JOIN:
 
                     $oldInterval->setEndDate($endDate);
                     $this->forSave[] = $oldInterval;
@@ -144,7 +133,7 @@ class Apply
 
                     break;
 
-                case self::TYPE_LEFT_CROSS:
+                case Interval::TYPE_LEFT_CROSS:
 
                     if($newInterval->getPrice() == $oldInterval->getPrice())
                     {
@@ -159,11 +148,11 @@ class Apply
                     $this->forSave[] = $oldInterval;
                     break;
 
-                case self::TYPE_IN:
+                case Interval::TYPE_IN:
                     $this->forDelete[] = $oldInterval;
                     break;
 
-                case self::TYPE_RIGHT_CROSS:
+                case Interval::TYPE_RIGHT_CROSS:
 
                     if($newInterval->getPrice() == $oldInterval->getPrice())
                     {
@@ -186,7 +175,7 @@ class Apply
                     }
                     break;
 
-                case self::TYPE_RIGHT_JOIN:
+                case Interval::TYPE_RIGHT_JOIN:
 
                     if($leftJoin)
                     {
@@ -222,98 +211,6 @@ class Apply
                 $this->forSave[] = $newInterval;
             }
         }
-
-    }
-
-    /**
-     * Get type of affecting
-     * @return string
-     */
-    private function compareIntervals(Interval $new, Interval $old): string
-    {
-
-        $newStartTime = $new->getStartTime();
-        $newEndTime = $new->getEndTime();
-        $newPrice = $new->getPrice();
-        
-        $newPrevTime = $new->getBeforeTime();
-        $newNextTime = $new->getAfterTime();
-
-        $oldStartTime = $old->getStartTime();
-        $oldEndTime = $old->getEndTime();
-        $oldPrice = $old->getPrice();
-
-        // Left Out
-        if(
-            $newPrevTime > $oldEndTime
-            or (
-                $newPrevTime == $oldEndTime
-                and $newPrice != $oldPrice
-            )
-        ) {
-            return self::TYPE_OUT;
-        }
-
-        // Right Out
-        if(
-            $newNextTime < $oldStartTime
-            or (
-                $newNextTime == $oldStartTime
-                and $newPrice != $oldPrice
-            )
-        ) {
-            return self::TYPE_OUT;
-        }
-
-        // Left Join
-        if(
-            $newPrevTime == $oldEndTime
-            and $newPrice == $oldPrice
-        ) {
-            return self::TYPE_LEFT_JOIN;
-        }
-
-        // Right Join
-        if(
-            $newNextTime == $oldStartTime
-            and $newPrice == $oldPrice
-        ) {
-            return self::TYPE_RIGHT_JOIN;
-        }
-
-        // Old inside the new one
-        if(
-            $newStartTime <= $oldStartTime
-            and $newEndTime >= $oldEndTime
-        ) {
-            return self::TYPE_IN;
-        }
-
-        // Covered by old interval
-        if(
-            $newStartTime > $oldStartTime
-            and $newEndTime < $oldEndTime
-        ) {
-            return self::TYPE_COVERED;
-        }
-
-        // Cross right
-        if(
-            $oldStartTime >= $newStartTime
-            and $oldEndTime > $newEndTime 
-        ) {
-            return self::TYPE_RIGHT_CROSS;
-        }
-
-        // Cross left
-        if(
-            $oldStartTime < $newStartTime
-            and $oldEndTime <= $newEndTime 
-        ) {
-            return self::TYPE_LEFT_CROSS;
-        }
-
-        throw new \LogicException();
 
     }
 

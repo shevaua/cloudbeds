@@ -10,7 +10,15 @@ use Exceptions\SQLException;
 class Interval
 {
 
-    const REGEX_DATE = '#^\d{4}-\d{2}-\d{2}$#';
+    const REGEX_DATE = '#^(\d{4})-(\d{2})-(\d{2})$#';
+
+    const TYPE_OUT = 'outside';
+    const TYPE_IN = 'inside';
+    const TYPE_LEFT_CROSS = 'left_cross';
+    const TYPE_LEFT_JOIN = 'left_join';
+    const TYPE_RIGHT_CROSS = 'right_cross';
+    const TYPE_RIGHT_JOIN = 'right_join';
+    const TYPE_COVERED = 'covered';
 
     private static $table = 'interval';
 
@@ -50,12 +58,12 @@ class Interval
 
         if(isset($values['start']))
         {
-            $this->start = $values['start'];
+            $this->setStartDate($values['start']);
         }
 
         if(isset($values['end']))
         {
-            $this->end = $values['end'];
+            $this->setEndDate($values['end']);
         }
 
         if(isset($values['price']))
@@ -71,6 +79,10 @@ class Interval
     public function setStartDate(string $date)
     {
 
+        if(!$this->isDate($date))
+        {
+            throw new \LogicException('Wrong Date: '.$date);
+        }
         if($this->start != $date)
         {
             $this->start = $date;
@@ -84,7 +96,11 @@ class Interval
      */
     public function setEndDate(string $date)
     {
-
+        
+        if(!$this->isDate($date))
+        {
+            throw new \LogicException('Wrong Date: '.$date);
+        }
         if($this->end != $date)
         {
             $this->end = $date;
@@ -244,6 +260,114 @@ class Interval
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Compare with another interval
+     * @return string One of the Type
+     */
+    public function compareTo(Interval $interval): string
+    {
+
+        $newStartTime = $this->getStartTime();
+        $newEndTime = $this->getEndTime();
+        $newPrice = $this->getPrice();
+        
+        $newPrevTime = $this->getBeforeTime();
+        $newNextTime = $this->getAfterTime();
+
+        $oldStartTime = $interval->getStartTime();
+        $oldEndTime = $interval->getEndTime();
+        $oldPrice = $interval->getPrice();
+
+        // Left Out
+        if(
+            $newPrevTime > $oldEndTime
+            or (
+                $newPrevTime == $oldEndTime
+                and $newPrice != $oldPrice
+            )
+        ) {
+            return self::TYPE_OUT;
+        }
+
+        // Right Out
+        if(
+            $newNextTime < $oldStartTime
+            or (
+                $newNextTime == $oldStartTime
+                and $newPrice != $oldPrice
+            )
+        ) {
+            return self::TYPE_OUT;
+        }
+
+        // Left Join
+        if(
+            $newPrevTime == $oldEndTime
+            and $newPrice == $oldPrice
+        ) {
+            return self::TYPE_LEFT_JOIN;
+        }
+
+        // Right Join
+        if(
+            $newNextTime == $oldStartTime
+            and $newPrice == $oldPrice
+        ) {
+            return self::TYPE_RIGHT_JOIN;
+        }
+
+        // Old inside the new one
+        if(
+            $newStartTime <= $oldStartTime
+            and $newEndTime >= $oldEndTime
+        ) {
+            return self::TYPE_IN;
+        }
+
+        // Covered by old interval
+        if(
+            $newStartTime > $oldStartTime
+            and $newEndTime < $oldEndTime
+        ) {
+            return self::TYPE_COVERED;
+        }
+
+        // Cross right
+        if(
+            $oldStartTime >= $newStartTime
+            and $oldEndTime > $newEndTime 
+        ) {
+            return self::TYPE_RIGHT_CROSS;
+        }
+
+        // Cross left
+        if(
+            $oldStartTime < $newStartTime
+            and $oldEndTime <= $newEndTime 
+        ) {
+            return self::TYPE_LEFT_CROSS;
+        }
+
+        throw new \LogicException();
+
+    }
+
+    /**
+     * Checks whether string is correct date or not
+     * @return bool
+     */
+    private function isDate(string $date): bool
+    {
+        return (
+            preg_match(self::REGEX_DATE, $date, $matches)
+            and checkdate(
+                (int) $matches[2], 
+                (int) $matches[3], 
+                (int) $matches[1]
+            )
+        );
     }
 
 }
