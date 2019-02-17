@@ -9,8 +9,14 @@ use Pattern\Observer\Observable;
 class Connection extends Observable
 {
 
+    /**
+     * @var DB\Connection $instance
+     */
     private static $instance;
 
+    /**
+     * @return DB\Connection
+     */
     public static function get()
     {
 
@@ -23,6 +29,9 @@ class Connection extends Observable
     }
 
 
+    /**
+     * @var mysqli
+     */
     private $conn;
 
     public function __construct()
@@ -41,6 +50,10 @@ class Connection extends Observable
 
     }
 
+    /**
+     * Execute query
+     * @return void
+     */
     public function execute($query)
     {
         
@@ -58,21 +71,33 @@ class Connection extends Observable
 
     }
 
+    /**
+     * Get last error message
+     */
     public function getError()
     {
         return $this->conn->error;
     }
 
+    /**
+     * Get last inserted id
+     */
     public function getLastId()
     {
         return $this->conn->insert_id;
     }
 
+    /**
+     * Start transaction
+     */
     public function transaction()
     {
         return $this->conn->begin_transaction();
     }
 
+    /**
+     * Commit transaction
+     */
     public function commit()
     {
         return $this->conn->commit();

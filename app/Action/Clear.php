@@ -7,7 +7,6 @@ use Model\Interval;
 use DB\Where;
 use DB\Clause;
 use DB\Combined;
-use DB\Connection;
 
 class Clear extends AbstractAction
 {
@@ -19,8 +18,14 @@ class Clear extends AbstractAction
     protected function identifyChanges()
     {
 
+        /**
+         * @var Intervar $newInterval
+         */
         $newInterval = $this->interval;
 
+        /**
+         * @var array $affectedIntervals
+         */
         if(!$affectedIntervals = $this->getAffectedIntervals())
         {
             // nothing todo
@@ -32,19 +37,26 @@ class Clear extends AbstractAction
          */
         foreach($affectedIntervals as $oldInterval)
         {
+
+            /**
+             * Type of interval comparison
+             * @var string $type
+             */
             $type = $newInterval->compareTo($oldInterval);
             
             switch($type)
             {
-
                 case Interval::TYPE_COVERED:
 
                     $coveredStartDate = $oldInterval->getStartDate();
                     $coveredEndDate = $oldInterval->getEndDate();
                     
+                    // Update $oldInterval to start - 1
                     $oldInterval
                         ->setEndDate($newInterval->getBeforeDate());
                     $this->forSave[] = $oldInterval;
+
+                    // Create one additional from end + 1
                     $this->forSave[] = new Interval([
                         'price' => $oldInterval->getPrice(),
                         'start' => $newInterval->getAfterDate(),
@@ -55,21 +67,26 @@ class Clear extends AbstractAction
 
                 case Interval::TYPE_LEFT_CROSS:
 
+                    // Update $oldInterval
                     $oldInterval->setEndDate($newInterval->getBeforeDate());
                     $this->forSave[] = $oldInterval;
                     break;
 
                 case Interval::TYPE_IN:
+                    // Put in queue for removal
                     $this->forDelete[] = $oldInterval;
                     break;
 
                 case Interval::TYPE_RIGHT_CROSS:
 
+                    // Update $oldInterval
                     $oldInterval->setStartDate($newInterval->getAfterDate());
                     $this->forSave[] = $oldInterval;
                     break;
 
                 default:
+
+                    // in case of missed case
                     throw new \LogicException();
             }
         }

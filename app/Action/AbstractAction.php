@@ -3,10 +3,6 @@
 namespace Action;
 
 use Model\Interval;
-
-use DB\Where;
-use DB\Clause;
-use DB\Combined;
 use DB\Connection;
 
 abstract class AbstractAction
@@ -29,6 +25,9 @@ abstract class AbstractAction
      */
     protected $forDelete = [];
 
+    /**
+     * @param Interval $interval
+     */
     public function __construct(Interval $interval)
     {
 
@@ -40,6 +39,7 @@ abstract class AbstractAction
 
     /**
      * Save the changes
+     * Performe Delete|Update|Insert actions
      * @return void
      */
     private function saveChanges()

@@ -5,10 +5,18 @@ namespace Api;
 use Model\Interval;
 use Action\Apply;
 
+/**
+ * Facade for Adding Interval
+ */
 class Insert
 {
 
-    public function __construct($start, $end, $price)
+    /**
+     * @param string $start
+     * @param string $end
+     * @param float $price
+     */
+    public function __construct(string $start, string $end, float $price)
     {
 
         $interval = new Interval([

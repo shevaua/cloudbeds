@@ -4,11 +4,15 @@ namespace Cli;
 
 use Exceptions\Cli\WrongActionException;
 use Throwable;
+use Interfaces\Runable;
 
 class Factory
 {
 
-    public function getAction($name)
+    /**
+     * @return Runable
+     */
+    public function getAction(string $name): Runable
     {
 
         $className = 'Cli\\Action\\' . ucfirst($name);

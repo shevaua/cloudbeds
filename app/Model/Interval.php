@@ -2,10 +2,7 @@
 
 namespace Model;
 
-use DB\Connection;
-use Exceptions\DataException;
 use DB\QueryBuilder;
-use Exceptions\SQLException;
 
 class Interval
 {
@@ -22,15 +19,24 @@ class Interval
 
     private static $table = 'interval';
 
-    public static function create($columns = [])
+    /**
+     * Insert new record into DB
+     * @param array $data
+     * @return self
+     */
+    public static function create($data = []): self
     {
 
         return self::query()
-            ->insert($columns);
+            ->insert($data);
 
     }
 
-    public static function query()
+    /**
+     * Prepare and get query builde
+     * @return QueryBuilder
+     */
+    public static function query(): QueryBuilder
     {
 
         return new QueryBuilder(self::$table, self::class);
@@ -48,6 +54,10 @@ class Interval
     private $end;
     private $price = 0.0;
 
+
+    /**
+     * @param array $values
+     */
     public function __construct(array $values)
     {
 
@@ -74,6 +84,8 @@ class Interval
     }
 
     /**
+     * Set new start date
+     * @param string $date
      * @return self
      */
     public function setStartDate(string $date)
@@ -92,6 +104,8 @@ class Interval
     }
 
     /**
+     * Set new end date
+     * @param string $date
      * @return self
      */
     public function setEndDate(string $date)
@@ -110,6 +124,8 @@ class Interval
     }
 
     /**
+     * Set new price
+     * @param float $price
      * @return self
      */
     public function setPrice(float $price)
@@ -137,6 +153,9 @@ class Interval
             . ']';
     }
 
+    /**
+     * Save|Update instance to DB
+     */
     public function save()
     {
 
@@ -162,6 +181,9 @@ class Interval
 
     }
 
+    /**
+     * Delete instance from DB
+     */
     public function delete()
     {
         if(!$this->id)

@@ -7,7 +7,10 @@ use Exceptions\HttpException;
 class WrongControllerException extends HttpException
 {
 
-    public function __construct($controller)
+    /**
+     * @param string $controller
+     */
+    public function __construct(string $controller)
     {
         parent::__construct('Controller is missed: '.$controller);
     }

@@ -1,3 +1,8 @@
+# Files with main logic
+# /app/Action/Apply.php
+# /app/Action/Clear.php
+
+
 # Requirments:
 # - php71
 # - php71-mysqli

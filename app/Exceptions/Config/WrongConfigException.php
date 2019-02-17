@@ -7,7 +7,10 @@ use Exceptions\ConfigException;
 class WrongConfigException extends ConfigException
 {
 
-    public function __construct($path)
+    /**
+     * @param string $path
+     */
+    public function __construct(string $path)
     {
         parent::__construct('Wrong config format : '.$path);
     }

@@ -5,6 +5,7 @@ use Http\Router;
 use Http\Response;
 use Http\Route;
 use Exceptions\Http\WrongActionException as HttpActionException;
+use Exceptions\Http\WrongViewException;
 use Exceptions\Cli\WrongActionException;
 use Http\Response\ErrorResponse;
 use Http\Response\HtmlResponse;
@@ -23,9 +24,15 @@ class Application
         self::ENV_PROD,
     ];
 
+    /**
+     * @var Application $instance
+     */
     private static $instance;
 
-    public static function getInstance()
+    /**
+     * Create Application instance and register autoloader
+     */
+    public static function getInstance(): self
     {
 
         if(!self::$instance)
@@ -37,7 +44,12 @@ class Application
 
     }
 
-    public static function loader(string $className)
+    /**
+     * Class loader
+     * @param string $className
+     * @return bool
+     */
+    public static function loader(string $className): bool
     {
 
         $filePath = APP_PATH .'/'
@@ -54,24 +66,37 @@ class Application
 
     }
 
-
+    /**
+     * Environment
+     * @var string $env
+     */
     private $env;
 
+    /**
+     * Entry point for the app
+     * @return void
+     */
     public function run()
     {
 
         $sapiName = php_sapi_name();
+
         if($sapiName == 'cli')
         {
+            // cli
             $this->runCli();   
         }
         else
         {
+            // web
             $this->runWeb();
         }
 
     }
 
+    /**
+     * Entry point for cli
+     */
     private function runCli()
     {
 
@@ -99,6 +124,7 @@ class Application
             $name = array_shift($params);
         }
 
+        // Search and run cli action 
         try
         {
             $factory = new Cli\Factory;
@@ -113,12 +139,12 @@ class Application
         
     }
 
+    /**
+     * Entry point for cli
+     * @return void
+     */
     private function runWeb()
     {
-
-        ini_set('display_errors', 1);
-        ini_set('display_startup_errors', 1);
-        error_reporting(E_ALL);
 
         if(
             !defined('APP_ENV')
@@ -131,13 +157,26 @@ class Application
         
         try
         {
-
+            /**
+             * @var Request $request
+             */
             $request = $this->getIncomeRequest();
         
+            /**
+             * Search route for request
+             * @var Route $route
+             */
             $route = Router::getRoute($request);
 
+            /**
+             * Wrap response for route
+             * @var Response $response
+             */
             $response = $this->wrapResponse($route, $request);
 
+            /**
+             * Send Response
+             */
             $response->send();
 
         }
@@ -148,13 +187,20 @@ class Application
 
     }
 
-    public function getEnv()
+
+    /**
+     * Get Environment
+     * @return string
+     */
+    public function getEnv(): string
     {
-
         return $this->env;
-
     }    
 
+    /**
+     * Prepare Request
+     * @return Request
+     */
     private function getIncomeRequest(): Request
     {
 
@@ -168,21 +214,30 @@ class Application
 
     }
 
+    /**
+     * wrap data in response 
+     * @param Route $route
+     * @param Request $request
+     * @return Response
+     */
     private function wrapResponse(Route $route, Request $request): Response
     {
 
+        // Search for controller
         $factory = new Http\Factory;
-
         $controller = $factory
             ->getControllert($route->getController());
     
+        // Check for method
         if(!method_exists($controller, $request->getMethod()))
         {
             throw new HttpActionException(get_class($controller), $request->getMethod());
         }
 
+        // Get view from controller
         $return = $controller->{$request->getMethod()}($request);
 
+        // return response
         if($return instanceof HtmlView)
         {
             return new HtmlResponse($return, $return->getCode());
@@ -191,6 +246,8 @@ class Application
         {
             return new JsonResponse($return, $return->getCode());
         }
+
+        return new ErrorResponse(new WrongViewException(get_class($controller), $request->getMethod()));
 
     }
 

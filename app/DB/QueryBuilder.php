@@ -7,50 +7,75 @@ use Interfaces\Statement;
 class QueryBuilder
 {
 
+    /**
+     * @var string $table
+     * @var string $model
+     */
     private $table;
     private $model;
 
+    /**
+     * @var array where
+     * @var array $order
+     * @var int $limit
+     */
     private $where = [];
     private $order = [];
     private $limit;
 
-    public function __construct(string $table, $modelClass)
+    /**
+     * @param string $table
+     * @param string $modelClass
+     */
+    public function __construct(string $table, string $modelClass)
     {
         $this->table = $table;
         $this->model = $modelClass;
     }
 
+    /**
+     * Set limit for query
+     * @param int $num
+     * @return self
+     */
     public function limit(int $num)
     {
         $this->limit = $num;
         return $this;
     }
 
+    /**
+     * Set where statement
+     * @param Statement $statement
+     * @return self
+     */
     public function where(Statement $statement)
     {
-
         $this->where = $statement;
         return $this;
-
     }
 
+    /**
+     * Set order statement
+     * @param array $order
+     * @return self
+     */
     public function order(array $order)
     {
         $this->order = $order;
         return $this;
     }
 
+    /**
+     * Get list of records
+     * @return array
+     */
     public function find()
     {
         
         $connection = Connection::get();
         $query = $this->toSQL();
         $result = $connection->execute($query); 
-
-        if(!$result)
-        {
-            throw new SQLException($connection->getError(), $query);
-        }
 
         $collection = [];
 
@@ -66,108 +91,93 @@ class QueryBuilder
 
     }
 
-    public function first()
-    {
-        $this->limit(1);
-        $connection = Connection::get();
-        $query = $this->toSQL();
-        $result = $connection->execute($query); 
-
-        if(!$result)
-        {
-            throw new SQLException($connection->getError(), $query);
-        }
-        
-        if($result->num_rows < 1)
-        {
-            return null;
-        }
-
-        $values = $result->fetch_assoc();
-        $result->free();
-        return new $this->model($values);
-    }
-
+    /**
+     * Insert data into $table
+     * @param array $data
+     * @return instanceof $modelClass 
+     */
     public function insert(array $data)
     {
         
-        $query = 
-            'insert into `' . $this->table . '` set ';
+        $query = 'insert into `' . $this->table . '` set ';
+
         foreach($data as $name => $value)
         {
             $query .= '`' . $name . '`='
-                .(is_int($value) ? $value : '\'' . $value . '\'')
+                .((is_int($value) or is_float($value)) ? 
+                    $value : 
+                    '\'' . $value . '\'')
                 .', ';
         }
         $query = rtrim($query, ', ');
         
         $connection = Connection::get();
-        if(!$connection->execute($query))
-        {
-            throw new SQLException($connection->getError(), $query);
-        }
+        $connection->execute($query);
 
         $values = array_merge($data, ['id' => $connection->getLastId()]);
         return new $this->model($values);
 
     }
 
-    public function update($pk, $values)
+    /**
+     * Update record
+     * @param int $pk 
+     * @param array $data
+     */
+    public function update(int $pk, array $data)
     {
 
-        $query = 
-            'update `' . $this->table . '` set ';
-        foreach($values as $name => $value)
+        $query = 'update `' . $this->table . '` set ';
+        foreach($data as $name => $value)
         {
             $query .= '`' . $name . '`='
-                .(is_int($value) ? $value : '\'' . $value . '\'')
+                .((is_int($value) or is_float($value)) ? 
+                    $value : 
+                    '\'' . $value . '\'')
                 .', ';
         }
         $query = rtrim($query, ', ');
         $query .= ' where id='.$pk;
         
         $connection = Connection::get();
-        if(!$connection->execute($query))
-        {
-            throw new SQLException($connection->getError(), $query);
-        }
+        $connection->execute($query);
 
-        $values = array_merge($values, ['id' => $connection->getLastId()]);
+        $values = array_merge($data, ['id' => $connection->getLastId()]);
         return new $this->model($values);
 
     }
 
-    public function delete($pk)
+    /**
+     * Delete record by PK
+     * @param int $pk
+     * @return bool
+     */
+    public function delete(int $pk): bool
     {
         $connection = Connection::get();
         $query = 'delete from `'.$this->table.'` where id='.$pk;
-        $isSuccess = $connection->execute($query);
-
-        if(!$isSuccess)
-        {
-            throw new SQLException($connection->getError(), $query);
-        }
+        return $connection->execute($query);
     }
 
-    public function truncate()
+    /**
+     * Truncate table
+     * @return bool
+     */
+    public function truncate(): bool
     {
-
         $connection = Connection::get();
         $query = 'truncate table `'.$this->table.'`';
-        $isSuccess = $connection->execute($query);
-        
-        if(!$isSuccess)
-        {
-            throw new SQLException($connection->getError(), $query);
-        }
-
+        return $connection->execute($query);
     }
 
-    protected function toSQL()
+    /**
+     * Prepare select query
+     * @return string
+     */
+    protected function toSQL(): string
     {
 
-        $sql = 
-            'select `' . $this->table . '`.* '
+        $sql = 'select `' . $this->table . '`.* '
             .'from `'.$this->table.'` ';
 
         if($this->where)

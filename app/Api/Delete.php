@@ -5,10 +5,17 @@ namespace Api;
 use Model\Interval;
 use Action\Clear;
 
+/**
+ * Facade for Crearing interval
+ */
 class Delete
 {
 
-    public function __construct($start, $end)
+    /**
+     * @param string $start
+     * @param string $end
+     */
+    public function __construct(string $start, string $end)
     {
 
         $interval = new Interval([

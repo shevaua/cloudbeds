@@ -7,6 +7,10 @@ class Router
 
     private static $instance;
 
+    /**
+     * Get Router instance
+     * @return self
+     */
     public static function getInstance()
     {
         if(!self::$instance)
@@ -16,7 +20,11 @@ class Router
         return self::$instance;
     }
 
-    public static function getRoute(Request $r)
+    /**
+     * Facade for searchin route
+     * @return Route
+     */
+    public static function getRoute(Request $r): Route
     {
         return self::getInstance()
             ->get($r);
@@ -31,6 +39,10 @@ class Router
         $this->routes[] = new Route('/api/interval/reset', 'API\Interval\Reset');
     }
 
+    /**
+     * Get Route
+     * @return Route
+     */
     public function get(Request $r): Route
     {
 

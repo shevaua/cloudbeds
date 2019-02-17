@@ -7,7 +7,11 @@ use Exception;
 class SQLException extends Exception
 {
 
-    public function __construct($message, $query)
+    /**
+     * @param string $message
+     * @param string $query
+     */
+    public function __construct(string $message, string $query)
     {
         parent::__construct(
             $message . PHP_EOL.

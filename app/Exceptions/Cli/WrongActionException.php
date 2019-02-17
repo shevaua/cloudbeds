@@ -7,7 +7,10 @@ use Exceptions\CliException;
 class WrongActionException extends CliException
 {
 
-    public function __construct($actionName)
+    /**
+     * @param string $actionName
+     */
+    public function __construct(string $actionName)
     {
         parent::__construct('Wrong action '.$actionName);
     }

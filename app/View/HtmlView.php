@@ -5,21 +5,32 @@ namespace View;
 class HtmlView extends AbstractView
 {
 
-
+    /**
+     * @var string $layout
+     * @var string $page
+     */
     private $layout;
     private $page;
-    private $code;
 
-    public function __construct(string $layout, string $page = '', $code = 200)
+    /**
+     * @param string $layout
+     * @param string $page
+     * @param int $code
+     */
+    public function __construct(string $layout, string $page = '', int $code = 200)
     {
 
+        parent::__construct($code);
         $this->layout = $layout;
         $this->page = $page;
-        $this->code = $code;
 
     }
 
-    public function getContent()
+    /**
+     * Get view content
+     * @return string
+     */
+    public function getContent(): string
     {
         extract(['content' => $this->getPageContent()]);
         ob_start();
@@ -28,7 +39,11 @@ class HtmlView extends AbstractView
         return $content;
     }
 
-    private function getPageContent()
+    /**
+     * Get page view content
+     * @return string
+     */
+    private function getPageContent(): string
     {
         if(!$this->page)
         {
@@ -38,11 +53,6 @@ class HtmlView extends AbstractView
         include PROJECT_PATH . '/views/'.$this->layout.'/'.$this->page.'.php';
         $content = ob_get_clean();
         return $content;
-    }
-
-    public function getCode()
-    {
-        return $this->code;
     }
 
 }

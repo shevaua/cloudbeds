@@ -5,25 +5,30 @@ namespace View;
 class JsonView extends AbstractView
 {
 
-    private $data;
-    private $code;
+    /**
+     * @var array $data
+     */
+    private $data = [];
 
-    public function __construct(array $data, $code = 200)
+    /**
+     * @param array $data
+     * @param int $code
+     */
+    public function __construct(array $data, int $code = 200)
     {
 
+        parent::__construct($code);
         $this->data = $data;
-        $this->code = $code;
 
     }
 
-    public function getContent()
+    /**
+     * Get view content
+     * @return string
+     */
+    public function getContent(): string 
     {
         return json_encode($this->data);
-    }
-
-    public function getCode()
-    {
-        return $this->code;
     }
 
 }

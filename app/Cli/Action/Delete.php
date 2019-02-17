@@ -34,7 +34,7 @@ class Delete implements Runable
         }
 
         echo 'Run cli/do.php delete <date:YYYY-MM-DD>'.PHP_EOL;
-        echo 'Run cli/do.php add <start_date:YYYY-MM-DD> <end_date:YYYY-MM-DD>'.PHP_EOL;
+        echo 'Run cli/do.php delete <start_date:YYYY-MM-DD> <end_date:YYYY-MM-DD>'.PHP_EOL;
         echo 'Note: start_date should be <= to end_date'.PHP_EOL;
         
     }

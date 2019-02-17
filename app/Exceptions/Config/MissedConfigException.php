@@ -7,7 +7,10 @@ use Exceptions\ConfigException;
 class MissedConfigException extends ConfigException
 {
 
-    public function __construct($path)
+    /**
+     * @param string $path
+     */
+    public function __construct(string $path)
     {
         parent::__construct('Config is missed: '.$path);
     }

@@ -5,13 +5,6 @@ namespace Http;
 class Request
 {
 
-    const METHODS = [
-        'get',
-        'post',
-        'delete',
-        'patch',
-    ];
-
     private $method;
     private $path;
     private $params;

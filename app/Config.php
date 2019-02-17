@@ -8,8 +8,14 @@ class Config
 
     const CONFIG_DIR = 'config';
 
+    /**
+     * @var self
+     */
     private static $instance;
 
+    /**
+     * @return self
+     */
     public static function getInstance()
     {
 
@@ -22,6 +28,9 @@ class Config
     }
 
 
+    /**
+     * @var array $params
+     */
     private $params = [];
 
     public function __construct()
@@ -47,7 +56,11 @@ class Config
 
     }
 
-    public function get($name)
+    /**
+     * Get config value
+     * @return array|string
+     */
+    public function get(string $name)
     {
 
         $parts = explode('.', $name);

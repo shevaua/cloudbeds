@@ -4,7 +4,7 @@ namespace Exceptions\Http;
 
 use Exceptions\HttpException;
 
-class WrongActionException extends HttpException
+class WrongViewException extends HttpException
 {
 
     /**
@@ -13,7 +13,7 @@ class WrongActionException extends HttpException
      */
     public function __construct(string $controller, string $action)
     {
-        parent::__construct('Action is missed: '.$controller.'::'.$action);
+        parent::__construct('View is missed in: '.$controller.'::'.$action);
     }
 
 }

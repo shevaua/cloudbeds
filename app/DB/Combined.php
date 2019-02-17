@@ -10,9 +10,17 @@ class Combined implements Statement
     const TYPE_OR = 'or';
     const TYPE_END = 'and';
 
+    /**
+     * @var string $type
+     * @var array $statements
+     */
     private $type;
     private $statements = [];
 
+    /**
+     * @param string $type Use ['or'|'and']
+     * @param array $statements
+     */
     public function __construct(string $type, array $statements)
     {
 

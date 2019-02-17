@@ -9,7 +9,11 @@ use View\JsonView;
 class JsonResponse extends Response
 {
 
-    public function __construct(JsonView $view, $code = 200)
+    /**
+     * @param JsonView $view
+     * @param int $code
+     */
+    public function __construct(JsonView $view, int $code = 200)
     {
         parent::__construct(
             $code, 

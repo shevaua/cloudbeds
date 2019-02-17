@@ -8,7 +8,11 @@ use Exceptions\Http\WrongControllerException;
 class Factory
 {
 
-    public function getControllert($name)
+    /**
+     * Get controller instance
+     * @param string $name
+     */
+    public function getControllert(string $name)
     {
 
         $className = 'Http\\Controller\\' . $name;
