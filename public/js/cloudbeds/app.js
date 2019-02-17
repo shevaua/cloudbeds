@@ -127,16 +127,23 @@ cb = {};
                     if(response.success)
                     {
                         var innerHtml = '';
-                        for(i in response.intervals)
+                        if(response.intervals.length > 0)
                         {
-                            var interval = response.intervals[i];
-                            innerHtml += '<li><form>';
-                            innerHtml += '<input type="text" placeholder="Start: YYYY-MM-DD" name="start" value="'+interval.start+'">';
-                            innerHtml += '<input type="text" placeholder="End: YYYY-MM-DD" name="end" value="'+interval.end+'">';
-                            innerHtml += '<input type="text" placeholder="price" name="price" value="'+interval.price+'">'
-                            innerHtml += '<button onclick="cb.addInterval(this.form)" type="button">Update</button>'            
-                            innerHtml += '<button onclick="cb.deleteInterval(this.form)" type="button">Delete</button>'            
-                            innerHtml += '</form></li>';
+                            for(i in response.intervals)
+                            {
+                                var interval = response.intervals[i];
+                                innerHtml += '<div><form>';
+                                innerHtml += '<input type="text" placeholder="Start: YYYY-MM-DD" name="start" value="'+interval.start+'">';
+                                innerHtml += '<input type="text" placeholder="End: YYYY-MM-DD" name="end" value="'+interval.end+'">';
+                                innerHtml += '<input type="text" placeholder="price" name="price" value="'+interval.price+'">'
+                                innerHtml += '<button onclick="cb.addInterval(this.form)" type="button">Update</button>'            
+                                innerHtml += '<button onclick="cb.deleteInterval(this.form)" type="button">Delete</button>'            
+                                innerHtml += '</form></div>';
+                            }
+                        }
+                        else
+                        {
+                            innerHtml += 'Empty';
                         }
                         document.getElementById("intervals").innerHTML = innerHtml;
                     }
@@ -146,8 +153,8 @@ cb = {};
                 })
         },
         addButtons: () => {
-            var innerHtml = '<button onclick="cb.clickReset()">Reset</button>';
-            innerHtml += '<button onclick="cb.clickRefresh()">Refresh</button>';
+            var innerHtml = '<button class="reset" onclick="cb.clickReset()">Reset</button>';
+            innerHtml += '<button class="refresh" onclick="cb.clickRefresh()">Refresh</button>';
             document.getElementById("actions").innerHTML = innerHtml;
         },
         clearForm: () => {
@@ -155,6 +162,7 @@ cb = {};
             innerHtml += '<input type="text" placeholder="Start: YYYY-MM-DD" name="start" value="">';
             innerHtml += '<input type="text" placeholder="End: YYYY-MM-DD" name="end" value="">';
             innerHtml += '<input type="text" placeholder="price" name="price" value="">'
+            innerHtml += '<br>'
             innerHtml += '<button onclick="cb.addInterval(this.form)" type="button">Add</button>'            
             innerHtml += '<button onclick="cb.deleteInterval(this.form)" type="button">Delete</button>'            
             innerHtml += '</form></div>';

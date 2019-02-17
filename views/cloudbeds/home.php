@@ -4,7 +4,7 @@
 <div id="form"></div>
 
 <h3>List:</h3>
-<ul id="intervals"></ul>
+<div id="intervals"></div>
 
 <h3>Actions:</h3>
 <div id="actions">

@@ -1,0 +1,21 @@
+*
+{
+    text-align: center;
+}
+
+#actions button
+{
+    padding: 10px;
+    color: #fff;
+    margin: 5px;
+}
+
+#actions .reset
+{
+    background-color: #800;
+}
+
+#actions .refresh
+{
+    background-color: #080;
+}
