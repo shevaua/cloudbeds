@@ -10,6 +10,8 @@ use Exceptions\SQLException;
 class Interval
 {
 
+    const REGEX_DATE = '#^\d{4}-\d{2}-\d{2}$#';
+
     private static $table = 'interval';
 
     public static function create($columns = [])

@@ -4,11 +4,10 @@ namespace Cli\Action;
 
 use Interfaces\Runable;
 use Api\Insert;
+use Model\Interval;
 
 class Add implements Runable
 {
-
-    const REGEX_DATE = '#^\d{4}-\d{2}-\d{2}$#';
 
     public function run(array $params = [])
     {
@@ -17,7 +16,7 @@ class Add implements Runable
             count($params) == 2
             and $price = (float) $params[1]
             and $price > 0
-            and preg_match(self::REGEX_DATE, $params[0])
+            and preg_match(Interval::REGEX_DATE, $params[0])
             and $timestamp = strtotime($params[0])
         ) {
             new Insert($params[0], $params[0], $price);
@@ -28,8 +27,8 @@ class Add implements Runable
             count($params) == 3
             and $price = (float) $params[2]
             and $price > 0
-            and preg_match(self::REGEX_DATE, $params[0])
-            and preg_match(self::REGEX_DATE, $params[1])
+            and preg_match(Interval::REGEX_DATE, $params[0])
+            and preg_match(Interval::REGEX_DATE, $params[1])
             and $start = strtotime($params[0])
             and $end = strtotime($params[1])
             and $start <= $end
