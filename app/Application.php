@@ -158,10 +158,12 @@ class Application
     private function getIncomeRequest(): Request
     {
 
+        parse_str(file_get_contents('php://input'), $result);
+
         return new Request(
             $_SERVER['REQUEST_METHOD'],
             str_replace('?'.$_SERVER['QUERY_STRING'] , '', $_SERVER['REQUEST_URI']),
-            $_GET + $_POST
+            $_GET + $_POST + $result
         );
 
     }

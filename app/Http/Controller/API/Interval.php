@@ -6,6 +6,7 @@ use View\JsonView;
 use Http\Request;
 use Model\Interval as Range;
 use Api\Insert;
+use Api\Delete;
 
 class Interval
 {
@@ -56,6 +57,32 @@ class Interval
         }
 
         new Insert($params['start'], $params['end'], $price);
+        
+        return new JsonView([
+            'success' => true,
+        ]);
+        
+    }
+
+    public function delete(Request $r)
+    {
+        
+        $params = $r->getParams();
+        
+        if(
+            count($params) != 2
+            or !preg_match(Range::REGEX_DATE, $params['start'])
+            or !preg_match(Range::REGEX_DATE, $params['end'])
+            or !$start = strtotime($params['start'])
+            or !$end = strtotime($params['end'])
+            or $start > $end
+        ) {        
+            return new JsonView([
+                'success' => false,
+            ]);
+        }
+
+        new Delete($params['start'], $params['end']);
         
         return new JsonView([
             'success' => true,
